@@ -1,14 +1,20 @@
-package com.example.springCrud.model;
+ package com.example.springCrud.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 @Entity
 @Table(name = "tasks")
+@Getter
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+    
     private String taskName;
     private boolean completed;
 
@@ -35,6 +41,4 @@ public class Task {
     public String getTaskName() {
         return taskName;
     }
-    
-
 }
