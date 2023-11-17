@@ -1,5 +1,7 @@
  package com.example.springCrud.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 
@@ -13,12 +15,17 @@ public class Task {
     
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonBackReference
     private User user;
     
     private String taskName;
     private boolean completed;
 
-     public boolean isCompleted() {
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public boolean isCompleted() {
         return completed;
     }
 

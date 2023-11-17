@@ -1,16 +1,21 @@
 package com.example.springCrud.controllers;
 
+
 import java.util.List;
 import java.util.Optional;
+
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.springCrud.dtos.TaskRecordDto;
 import com.example.springCrud.model.Task;
+import com.example.springCrud.model.User;
+import com.example.springCrud.model.UserPrincipal;
 import com.example.springCrud.repositories.TaskRepository;
 
 @RestController
@@ -22,13 +27,12 @@ public class TasksController {
         this.taskRepository = taskRepository;
     }
 
-    @GetMapping("/tasks")
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
-    }
 
     @PostMapping("/tasks")
-    public Task createTask(@RequestBody Task task) {
+    public Task createTask(@RequestBody Task task, Authentication authentication) {
+        UserPrincipal currentUserPrincipal = (UserPrincipal) authentication.getPrincipal();
+    
+        task.setUser(currentUserPrincipal.getUser());
         return taskRepository.save(task);
     }
 
@@ -38,7 +42,16 @@ public class TasksController {
         if (taskO.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+       
         return ResponseEntity.status(HttpStatus.OK).body(taskO.get());
+    }
+
+    @GetMapping("/tasks")
+    public ResponseEntity<List<Task>> getTasksForCurrentUser(Authentication authentication) {
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        List<Task> tasks = taskRepository.findByUser(userPrincipal.getUser());
+
+        return ResponseEntity.ok(tasks);
     }
 
     @PutMapping("/tasks/{id}")

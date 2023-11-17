@@ -11,19 +11,19 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.example.springCrud.model.User;
+import com.example.springCrud.model.UserPrincipal;
 
 @Service
 public class TokenService {
     @Value("${api.security.token.secret}")
     private String secret;
 
-    public String generateToken(User user) {
+    public String generateToken(UserPrincipal userPrincipal) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             String token = JWT.create()
                 .withIssuer("task-api")
-                .withSubject(user.getUsername())
+                .withSubject(userPrincipal.getUsername())
                 .withExpiresAt(genExpirationDate())
                 .sign(algorithm);
             return token;
