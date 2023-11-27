@@ -55,22 +55,36 @@ public class TasksController {
     }
 
     @PutMapping("/tasks/{id}")
-    public ResponseEntity updateTask(@PathVariable(value="id") Long id, @RequestBody TaskRecordDto taskRecordDto) {
+    public ResponseEntity updateTask(@PathVariable(value="id") Long id, @RequestBody TaskRecordDto taskRecordDto, Authentication authentication) {
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+
         Optional<Task> task = taskRepository.findById(id);
         if (task.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         var taskModel = task.get();
+        if (taskModel.getUser().getUser_id() != userPrincipal.getUser().getUser_id()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized to update this task.");
+        }
+
         BeanUtils.copyProperties(taskRecordDto, taskModel);
         return ResponseEntity.status(HttpStatus.OK).body(taskRepository.save(taskModel));
     }
 
     @DeleteMapping("/tasks/{id}")
-    public ResponseEntity<Object> deleteTask(@PathVariable(value="id") Long id) {
+    public ResponseEntity<Object> deleteTask(@PathVariable(value="id") Long id, Authentication authentication) {
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+
         Optional<Task> taskO = taskRepository.findById(id);
         if (taskO.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+
+        Task task = taskO.get();
+        if (task.getUser().getUser_id() != userPrincipal.getUser().getUser_id()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized to delete this task.");
+        }
+
         taskRepository.delete(taskO.get());
         return ResponseEntity.status(HttpStatus.OK).body("Task deleted successfully");
     }
