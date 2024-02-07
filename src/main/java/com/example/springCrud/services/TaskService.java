@@ -52,16 +52,24 @@ public class TaskService {
     }
 
     public ResponseEntity<Object> deleteTask(Long id, UserPrincipal userPrincipal) {
-        Optional<Task> taskO = taskRepository.findById(id);
-        if (taskO.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+        try {
+            Optional<Task> taskO = taskRepository.findById(id);
+            if (taskO.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
 
-        Task task = taskO.get();
-        if (task.getUser().getUser_id() != userPrincipal.getUser().getUser_id()) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized to delete this task.");
-        }
-        taskRepository.delete(task);
-        return ResponseEntity.status(HttpStatus.OK).body("Task deleted successfully");
+            Task task = taskO.get();
+
+            if (task.getUser().getUser_id() != userPrincipal.getUser().getUser_id()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not authorized to delete this task.");
+            }
+
+            taskRepository.delete(task);
+            
+            return ResponseEntity.status(HttpStatus.OK).body("Task deleted successfully");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while deleting the task.");
+        }        
     }
 }

@@ -2,6 +2,7 @@ package com.example.springCrud.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -31,5 +32,18 @@ public class User {
         this.login = login;
         this.password = password;
 
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if(o == null || getClass() != o.getClass());
+        User user = (User) o;
+        return Objects.equals(user_id, user.user_id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(user_id);
     }
 }
